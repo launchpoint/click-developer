@@ -1,0 +1,66 @@
+.developer
+  .button.collapsible_head
+    developer
+    -if (count($error_messages)>0)
+      ="(".count($error_messages).")"
+  .panel.collapsible{:id=>'developer_panel'}
+    %h1 Developer Tools
+    %h2 Run Time
+    = round($end-$start,2)
+    - if (count($error_messages)>0)
+      %h2{:style=>'color:red'} Errors
+      %ul
+        -foreach($error_messages as $error_message)
+          %li
+            =$error_message
+    %h2 Links
+    %ul
+      - $links = gather(event('developer_links'),'links')
+      -foreach($links as $link)
+        %li
+          %a{:href=>$link['href'], :target=>'_blank'}= $link['label']
+    %h2.collapsible_head Queries
+    .collapsible
+      %table{:width=>"100%"}
+        %tr
+          %th Query
+          %th Time (ms)
+          %th Results
+        -for($i=0;$i<count($queries);$i+=3)
+          %tr
+            %td{:style=>"white-space: normal"} +$queries[$i]
+            %td +$queries[$i+1]
+            %td +$queries[$i+2]
+    %h2.collapsible_head Messages
+    .collapsible
+      - event('developer_messages')
+    %h2.collapsible_head Loaded Modules
+    .collapsible
+      -foreach($loaded_modules as $module_path)
+        =$module_path
+        - if (file_exists($module_path."/test/index.php"))
+          (
+          %a{:href=>ftov($module_path)."/test/index.php"} test
+          )
+        %br
+    %h2.collapsible_head Event Lookup Table
+    .collapsible
+      %p
+        The ELT contains all the PHP-based hooks identified by the system for this route. Within each event, the PHP hooks are listed in order of execution.
+      %table
+        %tr
+          %th Event
+          %th Functions
+        -foreach($event_table as $event_name=>$hooks)
+          %tr{:valign=>'top'}
+            %td= $event_name
+            %td
+              -foreach($hooks as $hook_name)
+                =$hook_name
+                %br
+    %h2.collapsible_head Module Manifests Table (in order of loading)
+    .collapsible
+      %p
+        The MMT contains a listing of all metadata for modules, in the order in which they were loaded.
+      %pre
+        +s_var_export($manifests)
